@@ -1,0 +1,48 @@
+name: Checkout and form nice semantic versions with nbgv.
+
+on:
+  workflow_call:
+    # Map the workflow outputs to job outputs
+    outputs:
+      version1:
+        description: A version string in the form "1"
+        value: ${{ jobs.checkout.outputs.version1 }}
+      version2:
+        description: A version string in the form "1.2"
+        value: ${{ jobs.checkout.outputs.version2 }}
+      version3:
+        description: A version string in the form "1.2.3"
+        value: ${{ jobs.checkout.outputs.version3 }}
+      version4:
+        description: A version string in the form "1.2.3" or "1.2.3-preview" if a prerelease version is set.
+        value: ${{ jobs.checkout.outputs.version4 }}
+      version5:
+        description: A version string in the form "1.2.3.12" or "1.2.3-preview.12" if a prerelease version is set.
+        value: ${{ jobs.checkout.outputs.version5 }}
+
+      allVersions:
+        description: 
+        value: ${{ jobs.checkout.outputs.allVersions }}
+        
+jobs:
+  checkout:
+    runs-on: ubuntu-latest
+
+    outputs:
+      version1: ${{ steps.nbgv.outputs.VersionMajor }}
+      version2: ${{ steps.nbgv.outputs.VersionMajor }}.${{ steps.nbgv.outputs.VersionMinor }}
+      version3: ${{ steps.nbgv.outputs.VersionMajor }}.${{ steps.nbgv.outputs.VersionMinor }}.${{ steps.nbgv.outputs.BuildNumber }}
+      version4: ${{ steps.nbgv.outputs.VersionMajor }}.${{ steps.nbgv.outputs.VersionMinor }}.${{ steps.nbgv.outputs.BuildNumber }}${{ steps.nbgv.outputs.PrereleaseVersion }}
+      version5: ${{ steps.nbgv.outputs.VersionMajor }}.${{ steps.nbgv.outputs.VersionMinor }}.${{ steps.nbgv.outputs.BuildNumber }}${{ steps.nbgv.outputs.PrereleaseVersion }}.${{ steps.nbgv.outputs.VersionHeight }}
+      allVersions: '${{ steps.nbgv.outputs.VersionMajor }},${{ steps.nbgv.outputs.VersionMajor }}.${{ steps.nbgv.outputs.VersionMinor }},${{ steps.nbgv.outputs.VersionMajor }}.${{ steps.nbgv.outputs.VersionMinor }}.${{ steps.nbgv.outputs.BuildNumber }},${{ steps.nbgv.outputs.VersionMajor }}.${{ steps.nbgv.outputs.VersionMinor }}.${{ steps.nbgv.outputs.BuildNumber }}${{ steps.nbgv.outputs.PrereleaseVersion }},${{ steps.nbgv.outputs.VersionMajor }}.${{ steps.nbgv.outputs.VersionMinor }}.${{ steps.nbgv.outputs.BuildNumber }}${{ steps.nbgv.outputs.PrereleaseVersion }}.${{ steps.nbgv.outputs.VersionHeight }}'
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Determine semantic version
+      uses: dotnet/nbgv@master
+      id: nbgv
+
